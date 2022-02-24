@@ -1,4 +1,4 @@
-version 1.0
+version 1.1
 
 task TRUST4bamhg38 {
     input {
@@ -6,7 +6,10 @@ task TRUST4bamhg38 {
       String samplename
       Int thread
       Int stage
-      Int memory
+      Int runtime_memory
+      Int runtime_preemptible = 3
+      Float runtime_disk_multiplier = 5
+      Int runtime_disk_gb = ceil(size(bam, 'GB') * runtime_disk_multiplier)
     }
 
     command {
@@ -24,8 +27,11 @@ task TRUST4bamhg38 {
     }
 
     runtime {
+        disks: 'local-disk ${runtime_disk_gb} HDD'
         docker: "jemimalwh/trust4:0.2.0"
-        memory: "${memory} GB"
+        memory: "${runtime_memory} GB"
+        preemptible: '${runtime_preemptible}'
+        bootDiskSizeGb: 10
     }
 
     meta {
@@ -39,10 +45,10 @@ workflow TRUST4workflow {
         String samplename
         Int thread
         Int stage
-        Int memory
+        Int runtime_memory
     }
 
-    call TRUST4bamhg38 { input: bam=bam, samplename=samplename, thread=thread, stage=stage, memory=memory }
+    call TRUST4bamhg38 { input: bam=bam, samplename=samplename, thread=thread, stage=stage, memory=runtime_memory }
 
     output {
         File out_cdr3 = TRUST4bamhg38.out_cdr3
