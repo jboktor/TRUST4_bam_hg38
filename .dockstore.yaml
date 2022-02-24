@@ -1,0 +1,6 @@
+version: 1.1
+workflows:
+   - subclass: WDL
+     primaryDescriptorPath: /TRUST4_bam_hg38.wdl
+     testParameterFiles:
+         - /test_input.json
